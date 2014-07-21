@@ -28,7 +28,7 @@ int ORDER(const void *l, const void *r)
 }
 
 static char *Usage[] =
-    { "[-coU] [-(a|r):<db>] [-i<int(4)>] [-w<int(100)>] [-b<int(10)>] ",
+    { "[-comU] [-(a|r):<db>] [-i<int(4)>] [-w<int(100)>] [-b<int(10)>] ",
       "       <align:las> [ <reads:range> ... ]"
     };
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
   int     tspace, tbytes, small;
   int     reps, *pts;
 
-  int     ALIGN, CARTOON, OVERLAP, REFERENCE;
+  int     ALIGN, M4, CARTOON, OVERLAP, REFERENCE;
   int     INDENT, WIDTH, BORDER, UPPERCASE;
 
   //  Process options
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
       if (argv[i][0] == '-')
         switch (argv[i][1])
         { default:
-            ARG_FLAGS("coU")
+            ARG_FLAGS("comU")
             break;
           case 'i':
             ARG_NON_NEGATIVE(INDENT,"Indent")
@@ -91,10 +91,12 @@ int main(int argc, char *argv[])
       else
         argv[j++] = argv[i];
     argc = j;
-
+    
+    M4        = flags['m'];
     CARTOON   = flags['c'];
     OVERLAP   = flags['o'];
     UPPERCASE = flags['U'];
+
 
     if (argc <= 1)
       { fprintf(stderr,"Usage: %s %s\n",Prog_Name,Usage[0]);
@@ -285,24 +287,49 @@ int main(int argc, char *argv[])
 
         //  Display it
 
+        if (M4) {
+            int64 bbpos, bepos;
+            double acc;
+
+            tps = ((ovl->path.aepos-1)/tspace - ovl->path.abpos/tspace);
+
+
+            if (ovl->flags == 1) {
+                bbpos = (int64) ovl->blen - (int64) ovl->path.bepos;
+                bepos = (int64) ovl->blen - (int64) ovl->path.bbpos;
+            } else {
+                bbpos = (int64) ovl->path.bepos;
+                bepos = (int64) ovl->path.bbpos;
+
+            }
+
+            acc = 100-(200. * ovl->path.diffs)/( ovl->path.aepos - ovl->path.abpos + ovl->path.bepos - ovl->path.bbpos);
+            printf("%lld %lld 0 %5.2f ", (int64) ovl->aread+1, (int64) ovl->bread+1, acc);
+            printf("0 %lld %lld %lld ", (int64) ovl->path.abpos, (int64) ovl->path.aepos, (int64) ovl->alen);
+            printf("%d %lld %lld %lld %lld\n", ovl->flags, bbpos, bepos, (int64) ovl->blen, (int64) tps);
+
+        }
+
         if (CARTOON || ALIGN)
           printf("\n");
-        Print_Number((int64) ovl->aread+1,10,stdout);
-        printf("  ");
-        Print_Number((int64) ovl->bread+1,9,stdout);
-        if (COMP(ovl->flags))
-          printf(" c");
-        else
-          printf(" n");
-        printf("   [");
-        Print_Number((int64) ovl->path.abpos,6,stdout);
-        printf("..");
-        Print_Number((int64) ovl->path.aepos,6,stdout);
-        printf("] x [");
-        Print_Number((int64) ovl->path.bbpos,6,stdout);
-        printf("..");
-        Print_Number((int64) ovl->path.bepos,6,stdout);
-        printf("]");
+        if (!M4) {
+            Print_Number((int64) ovl->aread+1,10,stdout);
+            printf("  ");
+            Print_Number((int64) ovl->bread+1,9,stdout);
+            if (COMP(ovl->flags))
+              printf(" c");
+            else
+              printf(" n");
+            printf("   [");
+            Print_Number((int64) ovl->path.abpos,6,stdout);
+            printf("..");
+            Print_Number((int64) ovl->path.aepos,6,stdout);
+            printf("] x [");
+            Print_Number((int64) ovl->path.bbpos,6,stdout);
+            printf("..");
+            Print_Number((int64) ovl->path.bepos,6,stdout);
+            printf("]");
+        }
 
 /*
 { int u;
@@ -354,7 +381,7 @@ int main(int argc, char *argv[])
             printf(" trace pts)\n\n");
             Print_OCartoon(stdout,ovl,INDENT);
           }
-        else
+        else if (!M4)
           { printf(" :   < ");
             Print_Number((int64) ovl->path.diffs,6,stdout);
             printf(" diffs  (");
