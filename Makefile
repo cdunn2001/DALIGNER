@@ -32,7 +32,7 @@ DBLib: DB.c DB.h
 
 clean:
 	rm -f daligner HPCdaligner
-	rm -f LAsort LAmerge LAshow LAsplit LAcat LAcheck
+	rm -f LAsort LAmerge LAshow LAsplit LAcat LAcheck DB.so
 
 install:
 	cp daligner HPCdaligner ~/bin
