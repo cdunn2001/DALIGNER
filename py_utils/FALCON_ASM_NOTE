@@ -19,7 +19,7 @@ for i in 1 2 3 4; do
 done
 
 mkdir falcon_asm
-cat preads.1.fa preads.2.fa preads.3.fa preads.3.fa > falcon_asm/preads.fa
+cat preads.1.fa preads.2.fa preads.3.fa preads.4.fa > falcon_asm/preads.fa
 
 cd falcon_asm
 falcon_overlap.py --d_core 3 --n_core 24 --min_len 8000 preads.fa > preads.ovl
