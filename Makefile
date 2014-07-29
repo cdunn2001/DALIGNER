@@ -27,7 +27,7 @@ LAsplit: LAsplit.c align.h DB.c DB.h
 LAcheck: LAcheck.c align.c align.h DB.c DB.h
 	gcc $(CFLAGS) -o LAcheck LAcheck.c align.c DB.c -lm
 
-DBLib: DB.c DB.h
+DB.so: DB.c DB.h
 	gcc $(CFLAGS) -shared -fPIC -o DB.so DB.c DB.h -lm
 
 clean:
