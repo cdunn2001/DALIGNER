@@ -284,20 +284,34 @@ int main(int argc, char *argv[])
         if (!in)
           continue;
 
-        if (OVERLAP)
+        if (OVERLAP && !FALCON)
           { if (ovl->path.abpos != 0 && ovl->path.bbpos != 0)
               continue;
             if (ovl->path.aepos != ovl->alen && ovl->path.bepos != ovl->blen)
               continue;
           }
 
+        if (OVERLAP && FALCON)
+          { if (ovl->path.abpos > 50 && ovl->path.bbpos > 50)
+              continue;
+            if (ovl->alen - ovl->path.aepos > 50 && ovl->blen - ovl->path.bepos > 50)
+              continue;
+            if (ovl->alen < 8000)
+              continue;
+
+          }
+        
+
         //  Display it
 
         if (FALCON) {
-            int64 bbpos, bepos;
+            //int64 bbpos, bepos;
             double acc;
 
             tps = ((ovl->path.aepos-1)/tspace - ovl->path.abpos/tspace);
+            aln->alen  = ovl->alen;
+            aln->blen  = ovl->blen;
+            aln->flags = ovl->flags;
 
 
             //if (ovl->flags == 1) {
@@ -311,25 +325,26 @@ int main(int argc, char *argv[])
             
             if (p_aread == -1) {
                 Load_Read(db,ovl->aread,aln->aseq,2);
-                printf("%07d %s\n", ovl->aread, aln->aseq);
-                p_aread = ovl -> aread;
+                printf("%08d %s\n", ovl->aread, aln->aseq);
+                p_aread = ovl->aread;
             }
             if (p_aread != ovl -> aread ) {
                 printf("+ +\n");
                 Load_Read(db,ovl->aread,aln->aseq,2);
-                printf("%07d %s\n", ovl->aread, aln->aseq);
+                printf("%08d %s\n", ovl->aread, aln->aseq);
                 p_aread = ovl->aread;
             }
 
-            Load_Read(db,ovl->bread,aln->bseq,2);
-                //printf("%07d %s\n", ovl->bread, aln->bseq);
-                p_aread = ovl->aread;
+            Load_Read(db,ovl->bread,aln->bseq,0);
+            //printf("%07d %s\n", ovl->bread, aln->bseq);
+            p_aread = ovl->aread;
             if (COMP(aln->flags))
               Complement_Seq(aln->bseq);
+            Upper_Read(aln->bseq);
             strncpy( buffer, aln->bseq + ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
             buffer[ (int64) ovl->path.bepos - (int64) ovl->path.bbpos - 1] = '\0';
             //printf("%07d %lld %lld %lld\n", ovl->bread, (int64) ovl->path.bepos, (int64) ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
-            printf("%07d %s\n", ovl->bread, buffer);
+            printf("%08d %s\n", ovl->bread, buffer);
 
             //acc = 100-(200. * ovl->path.diffs)/( ovl->path.aepos - ovl->path.abpos + ovl->path.bepos - ovl->path.bbpos);
             //printf("%lld %lld 0 %5.2f ", (int64) ovl->aread+1, (int64) ovl->bread+1, acc);
@@ -340,6 +355,8 @@ int main(int argc, char *argv[])
 
         if (CARTOON || ALIGN)
             printf("\n");
+        if (!FALCON) 
+          {
             Print_Number((int64) ovl->aread+1,10,stdout);
             printf("  ");
             Print_Number((int64) ovl->bread+1,9,stdout);
@@ -356,7 +373,7 @@ int main(int argc, char *argv[])
             printf("..");
             Print_Number((int64) ovl->path.bepos,6,stdout);
             printf("]");
-
+         }
 /*
 { int u;
   if (small)
@@ -407,11 +424,14 @@ int main(int argc, char *argv[])
             printf(" trace pts)\n\n");
             Print_OCartoon(stdout,ovl,INDENT);
           }
-          printf(" :   < ");
-          Print_Number((int64) ovl->path.diffs,6,stdout);
-          printf(" diffs  (");
-          Print_Number(tps,3,stdout);
-          printf(" trace pts)\n");
+        if (!FALCON) 
+          {
+            printf(" :   < ");
+            Print_Number((int64) ovl->path.diffs,6,stdout);
+            printf(" diffs  (");
+            Print_Number(tps,3,stdout);
+            printf(" trace pts)\n");
+          }
           
       }
     if (FALCON) {
