@@ -28,7 +28,7 @@ int ORDER(const void *l, const void *r)
 }
 
 static char *Usage[] =
-    { "[-coU] [-(a|r|f):<db>] [-i<int(4)>] [-w<int(100)>] [-b<int(10)>] ",
+    { "[-mcoU] [-(a|r|f):<db>] [-i<int(4)>] [-w<int(100)>] [-b<int(10)>] ",
       "       <align:las> [ <reads:range> ... ]"
     };
 
@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
 
   int     ALIGN, FALCON, CARTOON, OVERLAP, REFERENCE;
   int     INDENT, WIDTH, BORDER, UPPERCASE;
+  int     M4OVL;
+  int     SEED_MIN;
 
   //  Process options
 
@@ -54,18 +56,20 @@ int main(int argc, char *argv[])
     ARG_INIT("LAshow")
 
     ALIGN     = 0;
+    M4OVL     = 0;
     REFERENCE = 0;
     FALCON    = 0;
     INDENT    = 4;
     WIDTH     = 100;
     BORDER    = 10;
+    SEED_MIN  = 8000;
 
     j = 1;
     for (i = 1; i < argc; i++)
       if (argv[i][0] == '-')
         switch (argv[i][1])
         { default:
-            ARG_FLAGS("coU")
+            ARG_FLAGS("comU")
             break;
           case 'i':
             ARG_NON_NEGATIVE(INDENT,"Indent")
@@ -75,6 +79,9 @@ int main(int argc, char *argv[])
             break;
           case 'b':
             ARG_NON_NEGATIVE(BORDER,"Alignment border")
+            break;
+          case 'H':
+            ARG_POSITIVE(SEED_MIN,"seed threshold (in bp.s)")
             break;
           case 'r':
             REFERENCE = 1;
@@ -98,6 +105,7 @@ int main(int argc, char *argv[])
     CARTOON   = flags['c'];
     OVERLAP   = flags['o'];
     UPPERCASE = flags['U'];
+    M4OVL = flags['m'];
 
 
     if (argc <= 1)
@@ -202,7 +210,7 @@ int main(int argc, char *argv[])
         tbytes = sizeof(uint16);
       }
 
-    if (!FALCON) 
+    if (!(FALCON || M4OVL)) 
       { printf("\n%s: ",root);
         Print_Number(novl,0,stdout);
         printf(" records\n");
@@ -284,19 +292,19 @@ int main(int argc, char *argv[])
         if (!in)
           continue;
 
-        if (OVERLAP && !FALCON)
+        if (OVERLAP && !FALCON  )
           { if (ovl->path.abpos != 0 && ovl->path.bbpos != 0)
               continue;
             if (ovl->path.aepos != ovl->alen && ovl->path.bepos != ovl->blen)
               continue;
           }
 
-        if (OVERLAP && FALCON)
+        if (OVERLAP && FALCON  )
           { if (ovl->path.abpos > 50 && ovl->path.bbpos > 50)
               continue;
             if (ovl->alen - ovl->path.aepos > 50 && ovl->blen - ovl->path.bepos > 50)
               continue;
-            if (ovl->alen < 8000)
+            if (ovl->alen < SEED_MIN)
               continue;
 
           }
@@ -304,8 +312,8 @@ int main(int argc, char *argv[])
 
         //  Display it
 
-        if (FALCON) {
-            //int64 bbpos, bepos;
+        if (M4OVL) {
+            int64 bbpos, bepos;
             double acc;
 
             tps = ((ovl->path.aepos-1)/tspace - ovl->path.abpos/tspace);
@@ -314,14 +322,38 @@ int main(int argc, char *argv[])
             aln->flags = ovl->flags;
 
 
-            //if (ovl->flags == 1) {
-            //    bbpos = (int64) ovl->blen - (int64) ovl->path.bepos;
-            //    bepos = (int64) ovl->blen - (int64) ovl->path.bbpos;
-            //} else {
-            //    bbpos = (int64) ovl->path.bepos;
-            //    bepos = (int64) ovl->path.bbpos;
+            if (COMP(ovl->flags)) {
+                bbpos = (int64) ovl->blen - (int64) ovl->path.bepos;
+                bepos = (int64) ovl->blen - (int64) ovl->path.bbpos;
+            } else {
+                bbpos = (int64) ovl->path.bbpos;
+                bepos = (int64) ovl->path.bepos;
+            }
+            acc = 100-(200. * ovl->path.diffs)/( ovl->path.aepos - ovl->path.abpos + ovl->path.bepos - ovl->path.bbpos);
+            printf("%09lld %09lld %lld %5.2f ", (int64) ovl->aread, (int64) ovl->bread,  (int64) bbpos - (int64) bepos, acc);
+            printf("0 %lld %lld %lld ", (int64) ovl->path.abpos, (int64) ovl->path.aepos, (int64) ovl->alen);
+            printf("%d %lld %lld %lld ", COMP(ovl->flags), bbpos, bepos, (int64) ovl->blen);
+            if ( ((int64) ovl->blen < (int64) ovl->alen) && ((int64) ovl->path.bbpos < 4) && ((int64) ovl->blen - (int64) ovl->path.bepos < 4) ) 
+              {
+                printf("contains\n");
+              }
+            else if ( ((int64) ovl->alen < (int64) ovl->blen) && ((int64) ovl->path.abpos < 4) && ((int64) ovl->alen - (int64) ovl->path.aepos < 4) ) 
+              {
+                printf("contained\n");
+              }
+            else 
+              {
+                printf("overlap\n");
+              }
 
-            //}
+        }
+        if (FALCON) {
+
+            tps = ((ovl->path.aepos-1)/tspace - ovl->path.abpos/tspace);
+            aln->alen  = ovl->alen;
+            aln->blen  = ovl->blen;
+            aln->flags = ovl->flags;
+
             
             if (p_aread == -1) {
                 Load_Read(db,ovl->aread,aln->aseq,2);
@@ -336,26 +368,19 @@ int main(int argc, char *argv[])
             }
 
             Load_Read(db,ovl->bread,aln->bseq,0);
-            //printf("%07d %s\n", ovl->bread, aln->bseq);
             p_aread = ovl->aread;
             if (COMP(aln->flags))
               Complement_Seq(aln->bseq);
             Upper_Read(aln->bseq);
             strncpy( buffer, aln->bseq + ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
             buffer[ (int64) ovl->path.bepos - (int64) ovl->path.bbpos - 1] = '\0';
-            //printf("%07d %lld %lld %lld\n", ovl->bread, (int64) ovl->path.bepos, (int64) ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
             printf("%08d %s\n", ovl->bread, buffer);
-
-            //acc = 100-(200. * ovl->path.diffs)/( ovl->path.aepos - ovl->path.abpos + ovl->path.bepos - ovl->path.bbpos);
-            //printf("%lld %lld 0 %5.2f ", (int64) ovl->aread+1, (int64) ovl->bread+1, acc);
-            //printf("0 %lld %lld %lld ", (int64) ovl->path.abpos, (int64) ovl->path.aepos, (int64) ovl->alen);
-            //printf("%d %lld %lld %lld %lld\n", ovl->flags, bbpos, bepos, (int64) ovl->blen, (int64) tps);
 
         }
 
         if (CARTOON || ALIGN)
             printf("\n");
-        if (!FALCON) 
+        if (!(FALCON || M4OVL)) 
           {
             Print_Number((int64) ovl->aread+1,10,stdout);
             printf("  ");
@@ -424,7 +449,7 @@ int main(int argc, char *argv[])
             printf(" trace pts)\n\n");
             Print_OCartoon(stdout,ovl,INDENT);
           }
-        if (!FALCON) 
+        if (!(FALCON || M4OVL) ) 
           {
             printf(" :   < ");
             Print_Number((int64) ovl->path.diffs,6,stdout);
