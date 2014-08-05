@@ -1,3 +1,40 @@
+/************************************************************************************\
+*                                                                                    *
+* Copyright (c) 2014, Dr. Eugene W. Myers (EWM). All rights reserved.                *
+*                                                                                    *
+* Redistribution and use in source and binary forms, with or without modification,   *
+* are permitted provided that the following conditions are met:                      *
+*                                                                                    *
+*  · Redistributions of source code must retain the above copyright notice, this     *
+*    list of conditions and the following disclaimer.                                *
+*                                                                                    *
+*  · Redistributions in binary form must reproduce the above copyright notice, this  *
+*    list of conditions and the following disclaimer in the documentation and/or     *
+*    other materials provided with the distribution.                                 *
+*                                                                                    *
+*  · The name of EWM may not be used to endorse or promote products derived from     *
+*    this software without specific prior written permission.                        *
+*                                                                                    *
+* THIS SOFTWARE IS PROVIDED BY EWM ”AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,    *
+* INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND       *
+* FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL EWM BE LIABLE   *
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES *
+* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS  *
+* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY      *
+* THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING     *
+* NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  *
+* IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                      *
+*                                                                                    *
+* For any issues regarding this software and its use, contact EWM at:                *
+*                                                                                    *
+*   Eugene W. Myers Jr.                                                              *
+*   Bautzner Str. 122e                                                               *
+*   01099 Dresden                                                                    *
+*   GERMANY                                                                          *
+*   Email: gene.myers@gmail.com                                                      *
+*                                                                                    *
+\************************************************************************************/
+
 /*********************************************************************************************\
  *
  *  Produce a script to compute overlaps for all block pairs of a DB, and then sort and merge
@@ -21,7 +58,7 @@
 #include "filter.h"
 
 static char *Usage[] =
-  { "[-vbd] [-k<int(14)>] [-w<int(6)>] [-h<int(35)>] [-t<int>]",
+  { "[-vbd] [-k<int(14)>] [-w<int(6)>] [-h<int(35)>] [-t<int>] [-H<int>]",
     "       [-e<double(.70)] [-m<double(.55)>] [-l<int(1000)>]",
     "       [-s<int(100)>] [-dal<int(4)>] [-mrg<int(25)>]",
     "       <path:db> [<block:int>[-<range:int>]"
@@ -44,7 +81,7 @@ int main(int argc, char *argv[])
 
   int    MUNIT, DUNIT;
   int    VON, BON, DON;
-  int    WINT, TINT, HINT, KINT, SINT, LINT;
+  int    WINT, TINT, HGAP, HINT, KINT, SINT, LINT;
   double EREL, MREL;
 
   { int    i, j, k;         //  Process options
@@ -59,6 +96,7 @@ int main(int argc, char *argv[])
     WINT  = 6;
     HINT  = 35;
     TINT  = 0;
+    HGAP  = 0;
     EREL  = .70;
     MREL  = .55;
     SINT  = 100;
@@ -83,6 +121,9 @@ int main(int argc, char *argv[])
             break;
           case 't':
             ARG_POSITIVE(TINT,"Tuple suppression frequency")
+            break;
+          case 'H':
+            ARG_POSITIVE(HGAP,"HGAP threshold (in bp.s)")
             break;
           case 'e':
             ARG_REAL(EREL)
@@ -266,6 +307,8 @@ int main(int argc, char *argv[])
               printf(" -h%d",HINT);
             if (TINT > 0)
               printf(" -t%d",TINT);
+            if (HGAP > 0)
+              printf(" -H%d",HGAP);
             if (EREL != .7)
               printf(" -e%g",EREL);
             if (MREL != .55)
