@@ -1,10 +1,13 @@
 CFLAGS = -O4 -Wall -Wextra
 
-all: daligner HPCdaligner \
+all: daligner daligner_p HPCdaligner \
      LAsort LAmerge LAsplit LAcat LAshow LAcheck DB.so \
 
 daligner: daligner.c filter.c filter.h align.c align.h DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o daligner daligner.c filter.c align.c DB.c QV.c -lpthread -lm
+
+daligner_p: daligner.c filter_p.c filter.h align.c align.h DB.c DB.h QV.c QV.h
+	gcc $(CFLAGS) -o daligner_p daligner.c filter_p.c align.c DB.c QV.c -lpthread -lm
 
 HPCdaligner: HPCdaligner.c DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o HPCdaligner HPCdaligner.c DB.c QV.c -lm
@@ -27,8 +30,8 @@ LAsplit: LAsplit.c align.h DB.c DB.h QV.c QV.h
 LAcheck: LAcheck.c align.c align.h DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o LAcheck LAcheck.c align.c DB.c QV.c -lm
 
-DB.so: DB.c DB.h
-	gcc $(CFLAGS) -shared -fPIC -o DB.so DB.c DB.h -lm
+DB.so: DB.c DB.h QV.c QV.h
+	gcc $(CFLAGS) -shared -fPIC -o DB.so DB.c DB.h QV.c -lm
 
 clean:
 	rm -f daligner HPCdaligner
