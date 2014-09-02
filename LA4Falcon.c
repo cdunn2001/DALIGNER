@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     int    flags[128];
     char  *eptr;
 
-    ARG_INIT("LAshow")
+    ARG_INIT("LA4Falcon")
 
     ALIGN     = 0;
     M4OVL     = 0;
@@ -292,17 +292,17 @@ int main(int argc, char *argv[])
         if (!in)
           continue;
 
-        if (OVERLAP && !FALCON  )
+        if (OVERLAP && !FALCON)
           { if (ovl->path.abpos != 0 && ovl->path.bbpos != 0)
               continue;
             if (ovl->path.aepos != ovl->alen && ovl->path.bepos != ovl->blen)
               continue;
           }
 
-        if (OVERLAP && FALCON  )
-          { if (ovl->path.abpos > 50 && ovl->path.bbpos > 50)
+        if (OVERLAP && FALCON)
+          { if (ovl->path.abpos > 1000 && ovl->path.bbpos > 1000)
               continue;
-            if (ovl->alen - ovl->path.aepos > 50 && ovl->blen - ovl->path.bepos > 50)
+            if (ovl->alen - ovl->path.aepos > 1000 && ovl->blen - ovl->path.bepos > 1000)
               continue;
             if (ovl->alen < SEED_MIN)
               continue;
@@ -460,6 +460,7 @@ int main(int argc, char *argv[])
           
       }
     if (FALCON) {
+        printf("+ +\n");
         printf("- -\n");
     }
     free(trace);
