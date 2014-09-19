@@ -58,7 +58,7 @@
 #include "DB.h"
 #include "align.h"
 
-int ORDER(const void *l, const void *r)
+static int ORDER(const void *l, const void *r)
 { int x = *((int32 *) l);
   int y = *((int32 *) r);
   return (x-y);
@@ -225,8 +225,10 @@ int main(int argc, char *argv[])
     if (input == NULL)
       exit (1);
 
-    fread(&novl,sizeof(int64),1,input);
-    fread(&tspace,sizeof(int),1,input);
+    if (fread(&novl,sizeof(int64),1,input) != 1)
+      SYSTEM_ERROR
+    if (fread(&tspace,sizeof(int),1,input) != 1)
+      SYSTEM_ERROR
 
     if (tspace <= TRACE_XOVR)
       { small  = 1;
@@ -281,7 +283,7 @@ int main(int argc, char *argv[])
 
       { Read_Overlap(input,ovl);
         if (ovl->path.tlen > tmax)
-          { tmax = 1.2*ovl->path.tlen + 100;
+          { tmax = ((int) 1.2*ovl->path.tlen) + 100;
             trace = (uint16 *) Realloc(trace,sizeof(uint16)*tmax,"Allocating trace vector");
             if (trace == NULL)
               exit (1);
@@ -368,20 +370,6 @@ int main(int argc, char *argv[])
             printf("]");
         }
 
-/*
-{ int u;
-  if (small)
-    for (u = 0; u < ovl->path.tlen-1; u++)
-    // for (u = 1; u < ovl->path.tlen-2; u += 2)
-      printf("  %3d\n",((uint8 *) ovl->path.trace)[u]);
-  else
-    for (u = 0; u < ovl->path.tlen-1; u++)
-    // for (u = 1; u < ovl->path.tlen-2; u += 2)
-      printf("  %3d\n",((uint16 *) ovl->path.trace)[u]);
-}
-*/
-
-        // tps = ((ovl->path.aepos-1)/tspace - ovl->path.abpos/tspace) + 1;
         tps = ((ovl->path.aepos-1)/tspace - ovl->path.abpos/tspace);
         if (ALIGN)
           { if (small)
