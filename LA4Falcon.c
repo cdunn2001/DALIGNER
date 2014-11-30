@@ -333,11 +333,11 @@ int main(int argc, char *argv[])
             printf("%09lld %09lld %lld %5.2f ", (int64) ovl->aread, (int64) ovl->bread,  (int64) bbpos - (int64) bepos, acc);
             printf("0 %lld %lld %lld ", (int64) ovl->path.abpos, (int64) ovl->path.aepos, (int64) ovl->alen);
             printf("%d %lld %lld %lld ", COMP(ovl->flags), bbpos, bepos, (int64) ovl->blen);
-            if ( ((int64) ovl->blen < (int64) ovl->alen) && ((int64) ovl->path.bbpos < 4) && ((int64) ovl->blen - (int64) ovl->path.bepos < 4) ) 
+            if ( ((int64) ovl->blen < (int64) ovl->alen) && ((int64) ovl->path.bbpos < 1) && ((int64) ovl->blen - (int64) ovl->path.bepos < 1) ) 
               {
                 printf("contains\n");
               }
-            else if ( ((int64) ovl->alen < (int64) ovl->blen) && ((int64) ovl->path.abpos < 4) && ((int64) ovl->alen - (int64) ovl->path.aepos < 4) ) 
+            else if ( ((int64) ovl->alen < (int64) ovl->blen) && ((int64) ovl->path.abpos < 1) && ((int64) ovl->alen - (int64) ovl->path.aepos < 1) ) 
               {
                 printf("contained\n");
               }

@@ -21,6 +21,9 @@ LAmerge: LAmerge.c align.h DB.c DB.h QV.c QV.h
 LAshow: LAshow.c align.c align.h DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o LAshow LAshow.c align.c DB.c QV.c -lm
 
+LA4Falcon: LA4Falcon.c align.c align.h DB.c DB.h QV.c QV.h
+	gcc $(CFLAGS) -o LA4Falcon LA4Falcon.c align.c DB.c QV.c -lm
+
 LAcat: LAcat.c align.h DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o LAcat LAcat.c DB.c QV.c -lm
 
@@ -35,7 +38,7 @@ DB.so: DB.c DB.h QV.c QV.h
 
 clean:
 	rm -f daligner HPCdaligner
-	rm -f LAsort LAmerge LAshow LAsplit LAcat LAcheck DB.so
+	rm -f LAsort LAmerge LAshow LAsplit LAcat LAcheck DB.so LA4Falcon
 
 install:
 	cp daligner HPCdaligner ~/bin
