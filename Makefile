@@ -1,7 +1,7 @@
 CFLAGS = -O3 -Wall -Wextra -fno-strict-aliasing
 
 all: daligner daligner_p HPCdaligner \
-     LAsort LAmerge LAsplit LAcat LAshow LAcheck DB2Falcon DB.so \
+     LAsort LAmerge LAsplit LAcat LAshow LAcheck LA4Falcon DB2Falcon DB.so \
 
 daligner: daligner.c filter.c filter.h align.c align.h DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o daligner daligner.c filter.c align.c DB.c QV.c -lpthread -lm
