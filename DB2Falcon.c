@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
       exit (1);
     }
 
+  Trim_DB(db);
   { char *pwd, *root;
 
     pwd    = PathTo(argv[1]);
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
         //   For the relevant range of reads, write each to the file
         //     recreating the original headers with the index meta-data about each read
 
-        for (i = first; i < last; i++)
+        for (i = first; i < last && i <  db->nreads; i++)
           { int        j, len;
             HITS_READ *r;
 
