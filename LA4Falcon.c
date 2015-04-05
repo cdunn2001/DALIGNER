@@ -28,7 +28,7 @@ int ORDER(const void *l, const void *r)
 }
 
 static char *Usage[] =
-    { "[-mcoU] [-(a|r|f):<db>] [-i<int(4)>] [-w<int(100)>] [-b<int(10)>] ",
+    { "[-mcosU] [-(a|r|f):<db>] [-i<int(4)>] [-w<int(100)>] [-b<int(10)>] ",
       "       <align:las> [ <reads:range> ... ]"
     };
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
   int     ALIGN, FALCON, CARTOON, OVERLAP, REFERENCE;
   int     INDENT, WIDTH, BORDER, UPPERCASE;
   int     M4OVL;
-  int     SEED_MIN;
+  int     SEED_MIN, SKIP;
 
   //  Process options
 
@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     INDENT    = 4;
     WIDTH     = 100;
     BORDER    = 10;
+    SKIP      = 0;
     SEED_MIN  = 8000;
 
     j = 1;
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
       if (argv[i][0] == '-')
         switch (argv[i][1])
         { default:
-            ARG_FLAGS("comU")
+            ARG_FLAGS("comsU")
             break;
           case 'i':
             ARG_NON_NEGATIVE(INDENT,"Indent")
@@ -106,6 +107,7 @@ int main(int argc, char *argv[])
     OVERLAP   = flags['o'];
     UPPERCASE = flags['U'];
     M4OVL = flags['m'];
+    SKIP  = flags['s'];
 
 
     if (argc <= 1)
@@ -371,7 +373,7 @@ int main(int argc, char *argv[])
                 skip_rest = 0;
             }
 
-            if (skip_rest == 0 ) {
+            if (skip_rest == 0) {
                 Load_Read(db,ovl->bread,aln->bseq,0);
                 p_aread = ovl->aread;
                 if (COMP(aln->flags))
@@ -380,12 +382,14 @@ int main(int argc, char *argv[])
                 strncpy( buffer, aln->bseq + ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
                 buffer[ (int64) ovl->path.bepos - (int64) ovl->path.bbpos - 1] = '\0';
                 printf("%08d %s\n", ovl->bread, buffer);
-
-                if ( ((int64) ovl->alen < (int64) ovl->blen) && ((int64) ovl->path.abpos < 1) && ((int64) ovl->alen - (int64) ovl->path.aepos < 1) ) 
-                  {
-                    printf("* *\n");
-                    skip_rest = 1;
-                  }
+                
+                if (SKIP == 1) {  //if SKIP = 0, then skip_rest is always 0
+                    if ( ((int64) ovl->alen < (int64) ovl->blen) && ((int64) ovl->path.abpos < 1) && ((int64) ovl->alen - (int64) ovl->path.aepos < 1) ) 
+                      {
+                        printf("* *\n");
+                        skip_rest = 1;
+                      }
+                }
             }
 
         }
