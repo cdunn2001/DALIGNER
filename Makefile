@@ -43,7 +43,7 @@ DB.so: DB.c DB.h QV.c QV.h
 clean:
 	rm -f daligner HPCdaligner
 	rm -f LAsort LAmerge LAshow LAsplit LAcat LAcheck DB.so LA4Falcon
-	rm -f DB2Falcon
+	rm -f DB2Falcon daligner_p
 
 install:
 	cp daligner HPCdaligner ~/bin
