@@ -229,6 +229,7 @@ int main(int argc, char *argv[])
     int        in, npt, idx, ar;
     int64      tps;
     int64      p_aread = -1;
+    int        skip_rest = 0;
     char buffer[65536];
 
     if (ALIGN || FALCON)
@@ -359,22 +360,33 @@ int main(int argc, char *argv[])
                 Load_Read(db,ovl->aread,aln->aseq,2);
                 printf("%08d %s\n", ovl->aread, aln->aseq);
                 p_aread = ovl->aread;
+                skip_rest = 0;
             }
             if (p_aread != ovl -> aread ) {
                 printf("+ +\n");
-                Load_Read(db,ovl->aread,aln->aseq,2);
+                Load_Read(db,ovl->aread,aln->aseq,0);
+                Upper_Read(aln->aseq);
                 printf("%08d %s\n", ovl->aread, aln->aseq);
                 p_aread = ovl->aread;
+                skip_rest = 0;
             }
 
-            Load_Read(db,ovl->bread,aln->bseq,0);
-            p_aread = ovl->aread;
-            if (COMP(aln->flags))
-              Complement_Seq(aln->bseq);
-            Upper_Read(aln->bseq);
-            strncpy( buffer, aln->bseq + ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
-            buffer[ (int64) ovl->path.bepos - (int64) ovl->path.bbpos - 1] = '\0';
-            printf("%08d %s\n", ovl->bread, buffer);
+            if (skip_rest == 0 ) {
+                Load_Read(db,ovl->bread,aln->bseq,0);
+                p_aread = ovl->aread;
+                if (COMP(aln->flags))
+                  Complement_Seq(aln->bseq);
+                Upper_Read(aln->bseq);
+                strncpy( buffer, aln->bseq + ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
+                buffer[ (int64) ovl->path.bepos - (int64) ovl->path.bbpos - 1] = '\0';
+                printf("%08d %s\n", ovl->bread, buffer);
+
+                if ( ((int64) ovl->alen < (int64) ovl->blen) && ((int64) ovl->path.abpos < 1) && ((int64) ovl->alen - (int64) ovl->path.aepos < 1) ) 
+                  {
+                    printf("* *\n");
+                    skip_rest = 1;
+                  }
+            }
 
         }
 
