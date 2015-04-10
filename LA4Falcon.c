@@ -366,8 +366,7 @@ int main(int argc, char *argv[])
             }
             if (p_aread != ovl -> aread ) {
                 printf("+ +\n");
-                Load_Read(db,ovl->aread,aln->aseq,0);
-                Upper_Read(aln->aseq);
+                Load_Read(db,ovl->aread,aln->aseq,2);
                 printf("%08d %s\n", ovl->aread, aln->aseq);
                 p_aread = ovl->aread;
                 skip_rest = 0;
@@ -381,8 +380,27 @@ int main(int argc, char *argv[])
                 Upper_Read(aln->bseq);
                 strncpy( buffer, aln->bseq + ovl->path.bbpos, (int64) ovl->path.bepos - (int64) ovl->path.bbpos );
                 buffer[ (int64) ovl->path.bepos - (int64) ovl->path.bbpos - 1] = '\0';
-                printf("%08d %s\n", ovl->bread, buffer);
-                
+                printf("%08d %s", ovl->bread, buffer);
+#undef TEST_ALN_OUT
+#ifdef TEST_ALN_OUT
+                {
+                    tps = ((ovl->path.aepos-1)/tspace - ovl->path.abpos/tspace);
+                    if (small)
+                        Decompress_TraceTo16(ovl);
+                    Load_Read(db,ovl->aread,aln->aseq,0);
+                    Load_Read(db,ovl->bread,aln->bseq,0);
+                    if (COMP(aln->flags))
+                        Complement_Seq(aln->bseq);
+                    Compute_Trace_PTS(aln,work,tspace);
+                    int tlen  = aln->path->tlen;
+                    int *trace = aln->path->trace;
+                    int u;
+                    printf(" ");
+                    for (u = 0; u < tlen; u++)
+                        printf("%d,", (int16) trace[u]);
+                }
+#endif
+                printf("\n");
                 if (SKIP == 1) {  //if SKIP = 0, then skip_rest is always 0
                     if ( ((int64) ovl->alen < (int64) ovl->blen) && ((int64) ovl->path.abpos < 1) && ((int64) ovl->alen - (int64) ovl->path.aepos < 1) ) 
                       {
