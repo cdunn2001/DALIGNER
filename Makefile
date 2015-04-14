@@ -1,7 +1,8 @@
 CFLAGS = -O3 -Wall -Wextra -fno-strict-aliasing
 
-all: daligner daligner_p HPCdaligner \
-     LAsort LAmerge LAsplit LAcat LAshow LAcheck LA4Falcon DB2Falcon DB.so \
+ALL = daligner daligner_p HPCdaligner HPCmapper LAsort LAmerge LAsplit LAcat LAshow LAcheck LA4Falcon DB2Falcon DB.so
+
+all: $(ALL)
 
 daligner: daligner.c filter.c filter.h align.c align.h DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o daligner daligner.c filter.c align.c DB.c QV.c -lpthread -lm
@@ -11,6 +12,9 @@ daligner_p: daligner.c filter_p.c filter.h align.c align.h DB.c DB.h QV.c QV.h
 
 HPCdaligner: HPCdaligner.c DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o HPCdaligner HPCdaligner.c DB.c QV.c -lm
+
+HPCmapper: HPCmapper.c DB.c DB.h QV.c QV.h
+	gcc $(CFLAGS) -o HPCmapper HPCmapper.c DB.c QV.c -lm
 
 LAsort: LAsort.c align.h DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o LAsort LAsort.c DB.c QV.c -lm
@@ -41,13 +45,16 @@ DB.so: DB.c DB.h QV.c QV.h
 
 
 clean:
-	rm -f daligner HPCdaligner
-	rm -f LAsort LAmerge LAshow LAsplit LAcat LAcheck DB.so LA4Falcon
-	rm -f DB2Falcon daligner_p
+	rm -f $(ALL)
+	rm -f LAupgrade.Dec.31.2014
+	rm -f daligner.tar.gz
+
+LAupgrade.Dec.31.2014: LAupgrade.Dec.31.2014.c align.c align.h DB.c DB.h QV.c QV.h
+	gcc $(CFLAGS) -o LAupgrade.Dec.31.2014 LAupgrade.Dec.31.2014.c align.c DB.c QV.c -lm
+
 
 install:
-	cp daligner HPCdaligner ~/bin
-	cp LAsort LAmerge LAshow LAsplit LAcat LAcheck ~/bin
+	cp $(ALL) ~/bin
 
 package:
 	make clean
