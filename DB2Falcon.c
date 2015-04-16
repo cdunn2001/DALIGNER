@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
             HITS_READ *r;
 
             r     = reads + i;
-            len   = r->end - r->beg;
+            len   = r->rlen;
             fprintf(ofile,">%09lld", (long long int) i);
             fprintf(ofile,"\n");
 
