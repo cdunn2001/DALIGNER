@@ -120,9 +120,9 @@ int main(int argc, char *argv[])
             HITS_READ *r;
 
 
-            if ((reads[i].flags & DB_BEST) >= allflag && (reads[i].end - reads[i].beg) >= cutoff) 
+            if ((reads[i].flags & DB_BEST) >= allflag && (reads[i].rlen) >= cutoff) 
               { r     = reads + i;
-                len   = r->end - r->beg;
+                len   = reads[i].rlen;
                 printf("%09lld %09lld %s/%d\n", (long long int) i, (long long int) j, prolog, r->origin);
                 j++;
               }
