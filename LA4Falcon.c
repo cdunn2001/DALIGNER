@@ -704,15 +704,15 @@ int main(int argc, char *argv[])
             printf(" trace pts)\n");
           }
       }
-      if (FALCON) 
-        {
-          printf("+ +\n");
-          printf("- -\n");
-        }
+
+    if (FALCON) 
+      { printf("+ +\n");
+        printf("- -\n");
+      }
             
 
     free(trace);
-    if (ALIGN)
+    if (ALIGN || FALCON)
       { free(bbuffer-1);
         free(abuffer-1);
         Free_Work_Data(work);
