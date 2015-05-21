@@ -1447,7 +1447,7 @@ void Match_Filter(char *aname, HITS_DB *ablock, char *bname, HITS_DB *bblock,
   nfilt = ncheck = nhits = 0;
 
   if (VERBOSE)
-    { if (comp)
+    { if (!comp)
         printf("\nComparing %s to %s\n",aname,bname);
       else
         printf("\nComparing c(%s) to %s\n",aname,bname);
