@@ -41,7 +41,7 @@ DB2Falcon: DB2Falcon.c DB.c DB.h QV.c QV.h
 	gcc $(CFLAGS) -o DB2Falcon DB2Falcon.c DB.c QV.c -lm
 
 DB.so: DB.c DB.h QV.c QV.h
-	gcc $(CFLAGS) -shared -fPIC -o DB.so DB.c DB.h QV.c -lm
+	gcc $(CFLAGS) -shared -fPIC -o DB.so DB.c QV.c -lm
 
 
 clean:
